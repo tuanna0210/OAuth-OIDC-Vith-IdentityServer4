@@ -22,7 +22,7 @@ namespace MVCClient
                 options.ClientId = builder.Configuration["Authentication:AuthorizationCodeSetting:ClientId"];
                 options.ClientSecret = builder.Configuration["Authentication:AuthorizationCodeSetting:ClientSecret"];
                 options.Scope.Add(builder.Configuration["Authentication:AuthorizationCodeSetting:Scopes:0"]);
-
+                
                 options.ResponseType = "code";
                 options.UsePkce = true;
                 options.ResponseMode = "query";
