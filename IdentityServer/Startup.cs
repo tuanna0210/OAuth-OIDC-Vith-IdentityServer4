@@ -1,3 +1,5 @@
+using IdentityServer4;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -25,6 +27,15 @@ namespace IdentityServer
                 .AddInMemoryApiScopes(Config.ApiScopes)
                 .AddTestUsers(Config.GetUsers());
 
+            services.AddAuthentication()
+                .AddGoogle("Google", options =>
+                {
+                    options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+
+                    options.ClientId = "484512216465-ea189f919gdi5jo7tj8i7v1up9c9vd99.apps.googleusercontent.com";
+                    options.ClientSecret = "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";
+                });
+
             services.AddControllersWithViews();
         }
 
@@ -36,6 +47,8 @@ namespace IdentityServer
                 app.UseDeveloperExceptionPage();
             }
             app.UseIdentityServer();
+
+
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthorization();
