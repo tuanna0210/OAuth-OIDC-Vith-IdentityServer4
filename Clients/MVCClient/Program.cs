@@ -9,6 +9,26 @@ namespace MVCClient
             // Add services to the container.
             builder.Services.AddRazorPages();
 
+            //Config OIDC
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = "cookie";
+                options.DefaultChallengeScheme = "oidc";
+            })
+            .AddCookie("cookie")
+            .AddOpenIdConnect("oidc", options =>
+            {
+                options.Authority = builder.Configuration["Authentication:AuthorizationCodeSetting:AuthorityUrl"];
+                options.ClientId = builder.Configuration["Authentication:AuthorizationCodeSetting:ClientId"];
+                options.ClientSecret = builder.Configuration["Authentication:AuthorizationCodeSetting:ClientSecret"];
+                options.Scope.Add(builder.Configuration["Authentication:AuthorizationCodeSetting:Scopes:0"]);
+
+                options.ResponseType = "code";
+                options.UsePkce = true;
+                options.ResponseMode = "query";
+                options.SaveTokens = true;
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -23,10 +43,12 @@ namespace MVCClient
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
-
-            app.MapRazorPages();
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+            //app.MapRazorPages();
 
             app.Run();
         }
