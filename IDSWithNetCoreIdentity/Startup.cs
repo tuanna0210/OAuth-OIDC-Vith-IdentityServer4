@@ -34,7 +34,13 @@ namespace IDSWithNetCoreIdentity
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             // Adds IdentityServer
-            services.AddIdentityServer()
+            services.AddIdentityServer(options =>
+                {
+                    options.Events.RaiseErrorEvents = true;
+                    options.Events.RaiseInformationEvents = true;
+                    options.Events.RaiseFailureEvents = true;
+                    options.Events.RaiseSuccessEvents = true;
+                })
                 .AddDeveloperSigningCredential()
                 .AddInMemoryIdentityResources(Config.GetIdentityResources())
                 .AddInMemoryApiResources(Config.GetApiResources())
@@ -42,7 +48,8 @@ namespace IDSWithNetCoreIdentity
                 .AddInMemoryApiScopes(Config.ApiScopes)
                 .AddAspNetIdentity<IdentityUser>();
 
-            services.AddRazorPages();
+            services.AddAuthentication();
+            services.AddControllersWithViews();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -61,22 +68,13 @@ namespace IDSWithNetCoreIdentity
             }
 
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
-
-            // Adds IdentityServer
-            app.UseIdentityServer();
-
             app.UseRouting();
-
-            app.UseAuthentication();
+            // Block 4:
+            //  UseIdentityServer include a call to UseAuthentication
+            app.UseIdentityServer();
             app.UseAuthorization();
-
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapRazorPages();
-            //});
-
+            //app.UseMvcWithDefaultRoute();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
