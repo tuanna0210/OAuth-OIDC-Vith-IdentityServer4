@@ -48,7 +48,7 @@ namespace IDSWithNetCoreIdentity
                   },
                   new TestUser
                   {
-                    SubjectId = "88421113",
+                    SubjectId = "fffb509f-d521-4074-ab3d-662ce4eac378",
                     Username = "bob",
                     Password = "bob",
                     Claims =

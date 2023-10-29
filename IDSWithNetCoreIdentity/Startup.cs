@@ -48,16 +48,16 @@ namespace IDSWithNetCoreIdentity
                 })
                 .AddDeveloperSigningCredential()
                 //Store cho các Clients, Resources.. => thao tác thông qua ConfigurationDbContext
-                .AddConfigurationStore(options =>
-                    options.ConfigureDbContext = builder =>
-                    {
-                        builder.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
-                    }
-                )
-                //.AddInMemoryIdentityResources(Config.GetIdentityResources())
-                //.AddInMemoryApiResources(Config.GetApiResources())
-                //.AddInMemoryClients(Config.GetClients())
-                //.AddInMemoryApiScopes(Config.ApiScopes)
+                //.AddConfigurationStore(options =>
+                //    options.ConfigureDbContext = builder =>
+                //    {
+                //        builder.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
+                //    }
+                //)
+                .AddInMemoryIdentityResources(Config.GetIdentityResources())
+                .AddInMemoryApiResources(Config.GetApiResources())
+                .AddInMemoryClients(Config.GetClients())
+                .AddInMemoryApiScopes(Config.ApiScopes)
                 //Add store cho các bảng cần thiết khác để IS4 hoạt động => PersistedGrantDbContext
                 .AddOperationalStore(options =>
                     options.ConfigureDbContext = builder =>
