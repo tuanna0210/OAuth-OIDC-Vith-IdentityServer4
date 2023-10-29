@@ -1,4 +1,4 @@
-using IDSWithNetCoreIdentity.Data;
+﻿using IDSWithNetCoreIdentity.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace IDSWithNetCoreIdentity
@@ -27,10 +28,14 @@ namespace IDSWithNetCoreIdentity
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var connectionString = Configuration.GetConnectionString("DefaultConnection");
+            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                options.UseSqlServer(connectionString));
+
+           //services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true) Nếu config như này thì login URL sẽ thành /identity/account/login
+            services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             // Adds IdentityServer
@@ -42,10 +47,24 @@ namespace IDSWithNetCoreIdentity
                     options.Events.RaiseSuccessEvents = true;
                 })
                 .AddDeveloperSigningCredential()
-                .AddInMemoryIdentityResources(Config.GetIdentityResources())
-                .AddInMemoryApiResources(Config.GetApiResources())
-                .AddInMemoryClients(Config.GetClients())
-                .AddInMemoryApiScopes(Config.ApiScopes)
+                //Store cho các Clients, Resources.. => thao tác thông qua ConfigurationDbContext
+                .AddConfigurationStore(options =>
+                    options.ConfigureDbContext = builder =>
+                    {
+                        builder.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
+                    }
+                )
+                //.AddInMemoryIdentityResources(Config.GetIdentityResources())
+                //.AddInMemoryApiResources(Config.GetApiResources())
+                //.AddInMemoryClients(Config.GetClients())
+                //.AddInMemoryApiScopes(Config.ApiScopes)
+                //Add store cho các bảng cần thiết khác để IS4 hoạt động => PersistedGrantDbContext
+                .AddOperationalStore(options =>
+                    options.ConfigureDbContext = builder =>
+                    {
+                        builder.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
+                    }
+                )
                 .AddAspNetIdentity<IdentityUser>();
 
             services.AddAuthentication();
@@ -55,6 +74,7 @@ namespace IDSWithNetCoreIdentity
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            //Config.InitializeConfigurationDatabase(app);//Seeding configuration data
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
