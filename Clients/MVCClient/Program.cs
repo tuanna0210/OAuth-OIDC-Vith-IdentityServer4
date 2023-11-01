@@ -21,8 +21,13 @@ namespace MVCClient
                 options.Authority = builder.Configuration["Authentication:AuthorizationCodeSetting:AuthorityUrl"];
                 options.ClientId = builder.Configuration["Authentication:AuthorizationCodeSetting:ClientId"];
                 options.ClientSecret = builder.Configuration["Authentication:AuthorizationCodeSetting:ClientSecret"];
-                options.Scope.Add(builder.Configuration["Authentication:AuthorizationCodeSetting:Scopes:0"]);
-                
+               
+                var listScope = builder.Configuration.GetSection("Authentication:AuthorizationCodeSetting:Scopes").Get<List<string>>();
+                listScope.ForEach(s =>
+                {
+                    options.Scope.Add(s);
+                });
+
                 options.ResponseType = "code";
                 options.UsePkce = true;
                 options.ResponseMode = "query";

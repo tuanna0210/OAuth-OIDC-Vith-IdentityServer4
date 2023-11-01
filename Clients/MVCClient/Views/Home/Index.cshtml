@@ -3,6 +3,8 @@
 }
 
 <div class="text-center">
+    <p>Access token: @ViewBag.AccessToken </p>
+    <p>Identity token: @ViewBag.IdentityToken</p>
     <dl>
         @foreach (var claim in User.Claims)
         {

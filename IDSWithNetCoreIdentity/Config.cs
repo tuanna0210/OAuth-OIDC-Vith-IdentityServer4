@@ -81,14 +81,45 @@ namespace IDSWithNetCoreIdentity
         {
             return new List<ApiResource>
             {
-                new ApiResource("api1", "My API")
+                new ApiResource()
+                new ApiResource("api1", "My API"),
+                new ApiResource
+                {
+                    Name = "api2",
+
+                    // secret for using introspection endpoint
+                    //ApiSecrets =
+                    //{
+                    //    new Secret("secret".Sha256())
+                    //},
+
+                    // include the following using claims in access token (in addition to subject id)
+                    UserClaims = { JwtClaimTypes.Name, JwtClaimTypes.Email },
+
+                    // this API defines two scopes
+                    //Scopes =
+                    //{
+                    //    "api2.full_access",
+                    //    "api2.read_only"
+                    //}
+                }
             };
+            
         }
         public static IEnumerable<ApiScope> ApiScopes =>
         new[]
         {
             new ApiScope("api1"),
-
+            new ApiScope()
+            {
+                Name = "api2.full_access",
+                DisplayName = "Full access to API 2"
+            },
+            new ApiScope
+            {
+                Name = "api2.read_only",
+                DisplayName = "Read only access to API 2"
+            }
         };
 
         public static IEnumerable<Client> GetClients()
@@ -125,7 +156,7 @@ namespace IDSWithNetCoreIdentity
                     },
                     RedirectUris = {"https://localhost:5553/signin-oidc" },
                     // scopes that client has access to
-                    AllowedScopes = { "openid", "profile", "api1" },
+                    AllowedScopes = { "openid", "profile", "api1", "api2.full_access" },
                     RequirePkce = true,
                     RequireConsent = true,
                     AllowPlainTextPkce = false
